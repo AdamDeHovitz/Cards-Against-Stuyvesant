@@ -7,31 +7,61 @@
 #include <string.h>
 #include <signal.h>
 
-char white_cards[256][256]
-char black_cards[256][256]
+char white_cards[1000][1000];
+char black_cards[1000][1000];
 
 
 void read_in_files(){
   printf("\nRead in the file\n");
+  char line[1000];
 
-  int fd = open("white", O_RDONLY);
+  FILE *ptr_file;
+  ptr_file =fopen("whitecards.txt","r");
+  int count = 0;
+  if (ptr_file)
+    while (fgets(line,1000, ptr_file)!=NULL){
+      strcpy(white_cards[count], line);
+      printf("line: %s\n",line);
+      count++;
+    }
+
+  fclose(ptr_file);
+
+
+  /*
+
+  int fd = open("whitecards.txt", O_RDONLY);
   int d = 0;
-  int num = 0;
-  while(num > 0){
-    num = read( fd, &white_cards[d], sizeof(doctor));
-    /* printf("%d\n",num);
-       printf("%s\n",strerror(errno));*/
-    printf("%s\n",white_cards[d]);
+
+
+  char * file_content;
+  char * line;
+  printf("preparing to read");
+  int num = read( fd, &file_content, 2048);
+  printf("read in file");
+  int count = 0;
+  while (file_content){
+    line = strsep(&file_content, "\n");
+    printf("line: %s\n",line);
+    white_cards[count] = line;
+    count++;
+
   }
   close(fd); 
-  fd = open("black", O_RDONLY);
-  d = 0;
-  num = 0;
-  while(num > 0){
-    num = read( fd, &black_cards[d], sizeof(doctor));
-    /* printf("%d\n",num);
-       printf("%s\n",strerror(errno));*/
-    printf("%s\n",black_cards[d]);
-  }
-  close(fd); 
+
+  */
+
 }
+
+int main(int argc, char *argv[]){
+
+  read_in_files();
+
+
+  return 0;
+}
+
+
+
+
+
