@@ -7,9 +7,12 @@
 #include <string.h>
 #include <signal.h>
 #include <time.h>
-
-char white_cards[1000][1000];
-char black_cards[1000][1000];
+char * white_cards[1000];
+char * black_cards[1000];
+char white_cards_buffer[1000][1000];
+char black_cards_buffer[1000][1000];
+int numb_white_total;
+int numb_black_total;
 int numb_white;
 int numb_black;
 
@@ -17,6 +20,6 @@ void read_in_files(char * type);
 void read_white();
 void read_black();
 char * draw(char * type);
-void randomize ( char arr[], int n );
+//void randomize ( char arr[], int n );
 void shuffle(char * type);
 
