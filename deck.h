@@ -7,10 +7,15 @@
 #include <string.h>
 #include <signal.h>
 #include <time.h>
+
+//Represent a given "deck"
 char * white_cards[1000];
 char * black_cards[1000];
-char white_cards_buffer[1000][1000];
+
+//Permanent storage of all cards
+char white_cards_buffer[1000][1000];  
 char black_cards_buffer[1000][1000];
+
 int numb_white_total;
 int numb_black_total;
 int numb_white;
