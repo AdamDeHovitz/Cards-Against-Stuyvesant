@@ -42,6 +42,9 @@ int main(int arg, char ** arr) {
     }
     // Otherwise, if not exit, this prints out what you just sent
     printf("Message Sent: %s\n",parameter);
+    char response[100] = ""; 
+    read(id,response,sizeof(response));
+    printf("Message Recieved: %s\n",response);
   }
   return 0; 
 }

@@ -8,6 +8,12 @@
 #include <string.h> 
 #include <signal.h> 
 
+typedef struct client {
+	char name[256];
+	char whitecard[256];
+	int score;
+} client;
+
 int main() {
   // Variables 
   int id,client; 
@@ -41,6 +47,7 @@ int main() {
 	}
 	// Prints What It Receives if it was NOT exit
 	printf("Just Received This: %s\n",parameter);
+	write(client,parameter,sizeof(parameter));
       }
       close(client);
       printf("Server: Offline");
