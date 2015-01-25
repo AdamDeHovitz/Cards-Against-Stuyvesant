@@ -124,7 +124,7 @@ void shuffle ( char* type ){
 }
 
 
-
+/*
 int main(int argc, char *argv[]){
 
   read_in_files("both");
@@ -139,4 +139,4 @@ int main(int argc, char *argv[]){
 
 
   return 0;
-}
+  }*/
