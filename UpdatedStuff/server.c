@@ -10,12 +10,16 @@
 #include <sys/shm.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
+#include <fcntl.h>
 
+int number_users;
 int total_clients;
 typedef struct n  {
-	char name[256];
-	char whitecard[256];
-	int score;
+  int descriptor;
+  char name[256];
+  char whitecard[256];
+  int score;
+  
 } client_info;
 client_info * clients[10];
 
@@ -24,6 +28,7 @@ int main() {
   total_clients = 0;
   int id,client,semd; 
   char buff[256]; 
+  number_users = 2;
   // Socket Creation
   id = socket(AF_INET,SOCK_STREAM,0);
   // Port/Connect
@@ -35,7 +40,7 @@ int main() {
   bind(id, (struct sockaddr *)&reader, sizeof(reader)); 
   listen(id,1); 
   printf("Server: Online\n");
-
+  /*
   int shmkey = ftok("makefile", 'z');
   int sd = shmget(shmkey, sizeof(clients), 0664 | IPC_CREAT );
   client_info *p;
@@ -49,18 +54,44 @@ int main() {
   sb.sem_flg = SEM_UNDO;
   sb.sem_op = 4;
   semop(semd, &sb, 1);
+  */
 
-  // The main thing
-  while (total_clients < 4) {
-    client = accept(id, NULL, NULL); 
-    printf("Connected.\n");
-    total_clients++;
-    int count = fork(); 
-    if (!count) {
-      close(id);
-      while (1) {
-	char from_client[256] = ""; 
-	read(client,from_client,sizeof(from_client));
+
+  //fcntl(id, F_SETFL, O_NONBLOCK);
+
+  //Having people join in
+  while (total_clients < number_users) {
+    
+    if( (client = accept(id, NULL, NULL) ) != -1) {
+      char to_client[256] = "Welcome! Please give your name"; 
+      write(client,to_client,sizeof(to_client));
+      client_info *current = (client_info *)malloc(sizeof(client_info));
+      current->descriptor = client;
+      char from_client[256] = "";
+      read(client,from_client,sizeof(from_client));
+      printf("Just Received This: %s\n",from_client);
+      strcpy(current->name, from_client);
+      clients[total_clients] = current;
+      total_clients++;
+      
+    }
+  }
+  printf("Exited loop\n");
+  int x;
+  for(x = 0;x<number_users;x++){
+    printf("client %d: name = %s\n",x,clients[x]->name);
+  }
+  
+
+  /* 
+     printf("Connected.\n");
+     total_clients++;
+     int count = fork(); 
+     if (!count) {
+     close(id);
+     while (1) {
+     char from_client[256] = ""; 
+     read(client,from_client,sizeof(from_client));
 	// Checks if Exits (If so...)
 	if (from_client[0] == 'e' && from_client[1] == 'x' && from_client[2] == 'i' && from_client[3] == 't') {
 	  read(client,from_client,sizeof(from_client));
@@ -85,20 +116,15 @@ int main() {
       printf("Server: Offline");
       exit(0);
     }
-    else{
-      if (total_clients == 4){
-	wait(&count);
-      }
+    
     }
   }
   int sval;
   while (sval != 0){
     sval = semctl(semd, 0, GETVAL);
   }
-  int x;
-  for(x = 0;x<5;x++){
-    printf("client %d: name = %s",x,(p + x)->name);
-  }
+
+  */
   return 0;
 
 

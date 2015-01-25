@@ -28,6 +28,9 @@ int main(int arg, char ** arr) {
   while (1) {
     // Connected, sets parameter and gets it
     // (Used to test) printf("Client Connect %d: ",c);
+    char response[100]; 
+    printf("id: %zd\n",read(id,response,sizeof(response)));
+    printf("Message Recieved: %s\n",response);
     printf("Client: ");
     char parameter[100];
     fgets(parameter,sizeof(parameter),stdin);
@@ -43,9 +46,7 @@ int main(int arg, char ** arr) {
     }
     // Otherwise, if not exit, this prints out what you just sent
     printf("Message Sent: %s\n",parameter);
-    char response[100] = ""; 
-    read(id,response,sizeof(response));
-    printf("Message Recieved: %s\n",response);
+    
   }
   return 0; 
 }
