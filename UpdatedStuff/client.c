@@ -38,6 +38,7 @@ int main(int arg, char ** arr) {
       char stringy[10];
       sprintf(stringy,"%d",id);
       write(id,stringy,strlen(stringy));
+      printf("Exiting\n");
       return 0; 
     }
     // Otherwise, if not exit, this prints out what you just sent
