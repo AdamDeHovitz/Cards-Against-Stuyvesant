@@ -22,7 +22,7 @@ client_info * clients[10];
 int main() {
   // Variables 
   total_clients = 0;
-  int id,client; 
+  int id,client,semd; 
   char buff[256]; 
   // Socket Creation
   id = socket(AF_INET,SOCK_STREAM,0);
@@ -41,6 +41,14 @@ int main() {
   client_info *p;
   p = (client_info *) shmat(sd, 0, 0);
   p = clients[0];
+  
+  int semkey = ftok("makefile", 'a');
+  semd = semget( semkey, 1, 0664);
+  struct sembuf sb;
+  sb.sem_num = 0;
+  sb.sem_flg = SEM_UNDO;
+  sb.sem_op = 4;
+  semop(semd, &sb, 1);
 
   // The main thing
   while (total_clients < 4) {
@@ -53,23 +61,24 @@ int main() {
       while (1) {
 	char from_client[256] = ""; 
 	read(client,from_client,sizeof(from_client));
-      // Checks if Exits (If so...)
-      if (from_client[0] == 'e' && from_client[1] == 'x' && from_client[2] == 'i' && from_client[3] == 't') {
-	read(client,from_client,sizeof(from_client));
-	printf("Client %d has disconnected.\n",client);
-	return 0; 
-      }
+	// Checks if Exits (If so...)
+	if (from_client[0] == 'e' && from_client[1] == 'x' && from_client[2] == 'i' && from_client[3] == 't') {
+	  read(client,from_client,sizeof(from_client));
+	  printf("Client %d has disconnected.\n",client);
+	  return 0; 
+	}
       
-      // Prints What It Receives if it was NOT exit
-      p = (client_info *) shmat(sd, 0, 0);
-      client_info *current = (client_info *)malloc(sizeof(client_info));
-      strcpy(current->name, from_client);
+	// Prints What It Receives if it was NOT exit
+	p = (client_info *) shmat(sd, 0, 0);
+	client_info *current = (client_info *)malloc(sizeof(client_info));
+	strcpy(current->name, from_client);
       
-      *(p + total_clients) = *current;
+	*(p + total_clients) = *current;
+	sb.sem_op = -1;
+	semop(semd, &sb, 1);
+	printf("Just Received This: %s\n",from_client);
 
-      printf("Just Received This: %s\n",from_client);
-
-      char to_client[256] = "Recieved message"; 
+	char to_client[256] = "Recieved message"; 
 	write(client,to_client,sizeof(to_client));
       }
       close(client);
@@ -81,6 +90,10 @@ int main() {
 	wait(&count);
       }
     }
+  }
+  int sval;
+  while (sval != 0){
+    sval = semctl(semd, 0, GETVAL);
   }
   int x;
   for(x = 0;x<5;x++){
