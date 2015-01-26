@@ -65,7 +65,7 @@ int main() {
   while (total_clients < number_users) {
     
     if( (client = accept(id, NULL, NULL) ) != -1) {
-      int boolean = 1;
+      /*int boolean = 1;
       int x;
 
       //Attempt to fix strange client looping with first client
@@ -78,7 +78,7 @@ int main() {
 	}
       }
       printf("b: %d\n",boolean);
-      if (boolean){
+      if (boolean){*/
 	
 	char to_client[1000] = "Welcome! Please give your name"; 
 	write(client,to_client,sizeof(to_client));
@@ -86,18 +86,18 @@ int main() {
 	current->descriptor = client;
 	char from_client[1000] = "";
 	read(client,from_client,sizeof(from_client));
-	printf("Just Received This: %s\n",from_client);
+	printf("Just Received This: %s from %d\n",from_client,client);
 	strcpy(current->name, from_client);
 	clients[total_clients] = current;
 	total_clients++;}
       
-    }
+      //}
   }
   printf("Exited loop\n");
   //Testing to see if all users are accounted for
   int x;
   for(x = 0;x<number_users;x++){
-    printf("client %d: name = %s\n",x,clients[x]->name);
+    printf("client %d: name = %s Id = %d\n",x,clients[x]->name, clients[x]->descriptor);
   }
 
   //Setting up the game
@@ -108,7 +108,8 @@ int main() {
     for(counter = 0; counter < 7;counter++){
       strcat(to_client,draw("white"));
     }
-     write(client,to_client,sizeof(to_client));
+    printf("%s\n",to_client);
+    write(clients[x]->descriptor,to_client,sizeof(to_client));
 
   }
   

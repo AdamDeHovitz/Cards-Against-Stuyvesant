@@ -49,9 +49,10 @@ int main(int arg, char ** arr) {
     // Connected, sets parameter and gets it
     // (Used to test) printf("Client Connect %d: ",c);
     char response[1000]; 
-    //printf("id: %zd\n",read(id,response,sizeof(response)));
-    read(id,response,sizeof(response));
+    printf("id: %zd\n",read(id,response,sizeof(response)));
+    //read(id,response,sizeof(response));
     if (strncmp(response, "Your Deck:", 10) == 0){
+      printf("Recieved cards\n");
       get_cards(response);
       read(id,response,sizeof(response));
     }
@@ -61,7 +62,7 @@ int main(int arg, char ** arr) {
     fgets(parameter,sizeof(parameter),stdin);
     parameter[strlen(parameter)-1] = '\0';
     write(id,parameter,strlen(parameter)); 
-    // Determines if you put in 'exit', in which case you can disconnect
+    // Determines if you put in 'exit', in which case you can disconnect 
     if (parameter[0] == 'e' && parameter[1] == 'x' && parameter[2] == 'i' && parameter[3] == 't') {
       char stringy[10];
       sprintf(stringy,"%d",id);
