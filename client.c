@@ -13,6 +13,7 @@ int chosen;
 
 void print_cards(){
   int x;
+  printf("Your hand:\n");
   for(x = 0; x< numb_cards; x++)
     printf("Card %d: %s\n", x+1,white_cards[x]);
 }
@@ -35,7 +36,6 @@ void pick_white_card(char * response){
   print_cards();
   response = response + 4;
   printf("** %s \n",response);
-  int chosen;
   int result = scanf("%d", &chosen);
   char parameter[1000];
   strcpy(parameter,white_cards[chosen - 1]);
@@ -50,9 +50,8 @@ void pick_winner(){
   printf("Message Sent: %d\n",myInt);
 }
 void replace_card(char * response){
-  printf("%s\n",response);
-  strcpy(white_cards[chosen -1],response);
-  printf("WE MADE IT OUT\n");
+  //printf("%s\n",response);
+  strcpy(white_cards[chosen -1],strsep(&response, "\n"));
 }
 
 int main(int arg, char ** arr) {
