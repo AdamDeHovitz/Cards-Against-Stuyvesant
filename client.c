@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
-char * white_cards[10];
+char  white_cards[10][1000];
 int numb_cards;
 int id;
 
@@ -21,10 +21,10 @@ void get_cards(char * deck){
   numb_cards = 0;
   while (deck){
     card = strsep(&deck, "\n");
-    white_cards[numb_cards] = card;
+    strcpy(white_cards[numb_cards], card);
     numb_cards ++;
   }
-  white_cards[numb_cards] = 0;
+  //white_cards[numb_cards] = 0;
   numb_cards--;
   print_cards();
   
