@@ -34,9 +34,10 @@ void manage_round(){
   int x;
   for (x = 0;x<number_users;x++){
     if (x == judge){
-      write(clients[x]->descriptor,"You are the judge.",33);
+      char message[1000] = "You are the judge ";
+      write(clients[x]->descriptor,message,sizeof(message));
     } else {
-      char message[100] = "Judge is ";
+      char message[1000] = "Judge is ";
       strcat(message,clients[judge]->name);
       strcat(message, " \n");
       write(clients[x]->descriptor,message,sizeof(message));
@@ -70,6 +71,7 @@ void manage_round(){
       char response[1000];
       sprintf(response,"\n%d. from %s: ", n, clients[x]->name);
       strcat(response,card);
+      printf("%s\n",response);
       strcat(responses,response);
       n++;
     }

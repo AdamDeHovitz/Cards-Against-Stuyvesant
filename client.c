@@ -39,12 +39,14 @@ void pick_white_card(char * response){
   char parameter[1000];
   strcpy(parameter,white_cards[myInt - 1]);
   write(id,parameter,strlen(parameter));
+  printf("Message Sent: %s\n",parameter);
 }
 void pick_winner(){
   
   int myInt;
   int result = scanf("%d", &myInt);
   write(id,&myInt,sizeof(myInt));
+  printf("Message Sent: %d\n",myInt);
 }
 
 int main(int arg, char ** arr) {
