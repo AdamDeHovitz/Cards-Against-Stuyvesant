@@ -20,7 +20,7 @@ int total_clients;
 typedef struct n  {
   int descriptor;
   char name[1000];
-  char whitecard[1000];
+  //char whitecard[1000];
   int score;
 
 } client_info;
@@ -36,7 +36,7 @@ void manage_round(){
     if (x == judge){
       write(clients[x]->descriptor,"You are the judge.",33);
     } else {
-      char message[100] = "Judge: ";
+      char message[100] = "Judge is ";
       strcat(message,clients[judge]->name);
       strcat(message, " \n");
       write(clients[x]->descriptor,message,sizeof(message));
@@ -45,7 +45,7 @@ void manage_round(){
 
   //Draw a black card
   read_in_files("black");
-  char to_client[1000] = "Black Card: ";
+  char to_client[1000] = "Current Black Card: ";
   strcat(to_client, draw("black"));
   printf("%s\n",to_client);
 
@@ -55,11 +55,41 @@ void manage_round(){
   }
 
   //get responses and store them in the client_info for each client in array clients
-  char to_client2[1000] = "Pick a card to respond: ";
+  char to_client2[1000] = "[rn][pc]Pick the number of your chosen card: ";
   for(x = 0;x<number_users;x++){
     if (x != judge){
       write(clients[x]->descriptor,to_client2,sizeof(to_client2));
     }
+  }
+  char responses[1000] = "Responses are:";
+  int n = 1;
+  for(x = 0;x<number_users;x++){
+    if (x != judge){
+      char card[1000];
+      read(clients[x]->descriptor,card,sizeof(card));
+      char response[1000];
+      sprintf(response,"\n%d. from %s: ", n, clients[x]->name);
+      strcat(response,card);
+      strcat(responses,response);
+      n++;
+    }
+  }
+  for(x = 0;x<number_users;x++){
+    if (x != judge){
+      write(clients[x]->descriptor,responses,sizeof(responses));
+    }
+  }
+  char to_judge[1000] = "[rn][pw]Pick the winner\n";
+  strcat(to_judge,responses);
+  write(clients[judge]->descriptor,to_judge,sizeof(to_judge));
+  int winner;
+  read(clients[judge]->descriptor,&winner,sizeof(winner));
+  if (n < judge){
+    printf("%s won\n",clients[winner-1]->name);
+    clients[winner-1]->score++;}
+  else{
+    printf("%s won\n",clients[winner]->name);
+    clients[winner]->score++;
   }
 
 
@@ -75,7 +105,7 @@ int main() {
   judge = 0;
   int id,client,semd;
   char buff[256];
-  number_users = 2;
+  number_users = 3;//Eventually should ask the server to input
   // Socket Creation
   id = socket(AF_INET,SOCK_STREAM,0);
   // Port/Connect
@@ -87,24 +117,6 @@ int main() {
   bind(id, (struct sockaddr *)&reader, sizeof(reader));
   listen(id,1);
   printf("Server: Online\n");
-  /*
-  int shmkey = ftok("makefile", 'z');
-  int sd = shmget(shmkey, sizeof(clients), 0664 | IPC_CREAT );
-  client_info *p;
-  p = (client_info *) shmat(sd, 0, 0);
-  p = clients[0];
-
-  int semkey = ftok("makefile", 'a');
-  semd = semget( semkey, 1, 0664);
-  struct sembuf sb;
-  sb.sem_num = 0;
-  sb.sem_flg = SEM_UNDO;
-  sb.sem_op = 4;
-  semop(semd, &sb, 1);
-  */
-
-
-  //fcntl(id, F_SETFL, O_NONBLOCK);
 
   //Having people join in
   while (total_clients < number_users) {
@@ -125,7 +137,7 @@ int main() {
       printf("b: %d\n",boolean);
       if (boolean){*/
 
-	char to_client[1000] = "Welcome! Please give your name";
+	char to_client[1000] = "[rn]Welcome! Please give your name";
 	write(client,to_client,sizeof(to_client));
 	client_info *current = (client_info *)malloc(sizeof(client_info));
 	current->descriptor = client;
@@ -153,62 +165,19 @@ int main() {
     for(counter = 0; counter < 7;counter++){
       strcat(to_client,draw("white"));
     }
-    printf("%s\n",to_client);
+    //printf("%s\n",to_client);
     write(clients[x]->descriptor,to_client,sizeof(to_client));
 
   }
 
   //Running the game
-  //while (1){//temporarily permanent, should at some point
+  while (1){//temporarily permanent, should at some point
     manage_round();
-  //  }
-
-
-
-
-
-  /*
-     printf("Connected.\n");
-     total_clients++;
-     int count = fork();
-     if (!count) {
-     close(id);
-     while (1) {
-     char from_client[256] = "";
-     read(client,from_client,sizeof(from_client));
-	// Checks if Exits (If so...)
-	if (from_client[0] == 'e' && from_client[1] == 'x' && from_client[2] == 'i' && from_client[3] == 't') {
-	  read(client,from_client,sizeof(from_client));
-	  printf("Client %d has disconnected.\n",client);
-	  return 0;
-	}
-
-	// Prints What It Receives if it was NOT exit
-	p = (client_info *) shmat(sd, 0, 0);
-	client_info *current = (client_info *)malloc(sizeof(client_info));
-	strcpy(current->name, from_client);
-
-	*(p + total_clients) = *current;
-	sb.sem_op = -1;
-	semop(semd, &sb, 1);
-	printf("Just Received This: %s\n",from_client);
-
-	char to_client[256] = "Recieved message";
-	write(client,to_client,sizeof(to_client));
-      }
-      close(client);
-      printf("Server: Offline");
-      exit(0);
-    }
-
-    }
-  }
-  int sval;
-  while (sval != 0){
-    sval = semctl(semd, 0, GETVAL);
   }
 
-  */
+
+
+\
   return 0;
 
 

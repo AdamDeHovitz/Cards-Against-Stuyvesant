@@ -8,7 +8,13 @@
 #include <string.h>
 char * white_cards[10];
 int numb_cards;
+int id;
 
+void print_cards(){
+  int x;
+  for(x = 0; x< numb_cards; x++)
+    printf("Card %d: %s\n", x+1,white_cards[x]);
+}
 void get_cards(char * deck){
   char * card;
   strsep(&deck, "\n");
@@ -20,14 +26,28 @@ void get_cards(char * deck){
   }
   white_cards[numb_cards] = 0;
   numb_cards--;
-  int x;
-  for(x = 0; x< numb_cards; x++)
-    printf("Card %d: %s\n", x+1,white_cards[x]);
+  print_cards();
+  
 }
 
+void pick_white_card(char * response){
+  print_cards();
+  response = response + 4;
+  printf("** %s \n",response);
+  int myInt;
+  int result = scanf("%d", &myInt);
+  char parameter[1000];
+  strcpy(parameter,white_cards[myInt - 1]);
+  write(id,parameter,strlen(parameter));
+}
+void pick_winner(){
+  
+  int myInt;
+  int result = scanf("%d", &myInt);
+  write(id,&myInt,sizeof(myInt));
+}
 
 int main(int arg, char ** arr) {
-  int id;
   char buff[256];
   // Creates The Socket
   id = socket(AF_INET,SOCK_STREAM,0);
@@ -44,54 +64,50 @@ int main(int arg, char ** arr) {
   bind(id,(struct sockaddr *)&s,sizeof(s));
   int c;
   c = connect(id,(struct sockaddr *)&s,sizeof(s));
+
+
+
   while (1) {
     // Connected, sets parameter and gets it
     // (Used to test) printf("Client Connect %d: ",c);
-    int response_needed = 1;
-    char response[1000];
-    printf("id: %zd\n",read(id,response,sizeof(response)));
+    char response_buffer[1000];
+    printf("id: %zd\n",read(id,response_buffer,sizeof(response_buffer)));
     //read(id,response,sizeof(response));
+    char * response = response_buffer;
     if (strncmp(response, "Your Deck: ", 10) == 0){
       //printf("Your Deck: \n");
       get_cards(response);
-      read(id,response,sizeof(response));
-    } else if (strncmp(response, "You are the judge. ", 10) == 0){
-      //printf("\n Judge: \n");
-      read(id,response,sizeof(response));
-      response_needed = 0;
-    } else if (strncmp(response, "Judge: ", 5) == 0){
-      //printf("\n Judge: \n");
-      read(id,response,sizeof(response));
-      response_needed = 0;
-    } else if (strncmp(response, "Black Card: ", 10) == 0){
-      //printf("\n Black Card: \n");
-      read(id,response,sizeof(response));
-      response_needed = 0;
-    } else if (strncmp(response, "Pick a card to respond: ", 10) == 0){
-      //printf("\n Black Card: \n");
-      read(id,response,sizeof(response));
-      response_needed = 1;
-    }
-
-    printf("** %s \n",response);
-
-    if (response_needed){
-      printf("[Client]: ");
-      char parameter[1000];
-      fgets(parameter,sizeof(parameter),stdin);
-      parameter[strlen(parameter)-1] = '\0';
-      write(id,parameter,strlen(parameter));
-      // Determines if you put in 'exit', in which case you can disconnect
-      if (parameter[0] == 'e' && parameter[1] == 'x' && parameter[2] == 'i' && parameter[3] == 't') {
-        char stringy[10];
-        sprintf(stringy,"%d",id);
-        write(id,stringy,strlen(stringy));
-        printf("Exiting\n");
-        return 0;
+    } 
+    else if(strncmp("[rn]",response,4) == 0){  //Checking if Reply Needed
+      response = response + 4;
+      if(strncmp("[pc]",response,4) == 0){//Checking if it's Pick Card time
+	pick_white_card(response);
       }
-      // Otherwise, if not exit, this prints out what you just sent
-      printf("Message Sent: %s\n",parameter);
+      else if(strncmp("[pw]",response,4) == 0){//Checking if it's time to Pick Winner
+	printf("** %s \n",response);
+	pick_winner();
+      }
+      else{
+	printf("** %s \n",response);
+	printf("[Client]: ");
+	char parameter[1000];
+	fgets(parameter,sizeof(parameter),stdin);
+	parameter[strlen(parameter)-1] = '\0';
+	write(id,parameter,strlen(parameter));
+	// Determines if you put in 'exit', in which case you can disconnect
+	if (parameter[0] == 'e' && parameter[1] == 'x' && parameter[2] == 'i' && parameter[3] == 't') {
+	  char stringy[10];
+	  sprintf(stringy,"%d",id);
+	  write(id,stringy,strlen(stringy));
+	  printf("Exiting\n");
+	  return 0;
+	}
+	// Otherwise, if not exit, this prints out what you just sent
+	printf("Message Sent: %s\n",parameter);
+      }
     }
+    else //if it doesn't need a response, just print out text
+      printf("** %s \n",response);
 
   }
   return 0;
