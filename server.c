@@ -25,6 +25,18 @@ typedef struct n  {
 } client_info;
 client_info * clients[10];
 
+
+void play_round(){
+  //Should pick a judge
+  //Draw a black card
+  //Sent black card to each player
+  //get responses and store them in the client_info for each client in array clients
+  //Judge picks winner who gets score
+  //Could pretty easily implement some kind of system for choosing each judge
+ 
+}
+
+
 int main() {
   // Variables 
   total_clients = 0;
@@ -112,6 +124,15 @@ int main() {
     write(clients[x]->descriptor,to_client,sizeof(to_client));
 
   }
+
+  //Now we need to run the game
+  /*
+  while (1){//temporarily permanent, should at some point
+    play_round();
+    }
+  */
+
+
   
 
   /* 
