@@ -1,16 +1,4 @@
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <sys/types.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-char  white_cards[10][1000];
-int numb_cards;
-int id;
-int chosen;
-
+#include "client.h"
 
 static void sighandler( int signo ) {
   //Takes the signal number
@@ -26,12 +14,14 @@ static void sighandler( int signo ) {
 
 
 void print_cards(){
+  //Basic print function to show the user their hand
   int x;
   printf("Your hand:\n");
   for(x = 0; x< numb_cards; x++)
     printf("Card %d: %s\n", x+1,white_cards[x]);
 }
 void get_cards(char * deck){
+  //Importing the full 7 card deck
   char * card;
   strsep(&deck, "\n");
   numb_cards = 0;
@@ -47,6 +37,7 @@ void get_cards(char * deck){
 }
 
 void pick_white_card(char * response){
+  //The user picks their white card of choice
   print_cards();
   response = response + 4;
   printf("** %s \n",response);
@@ -57,14 +48,14 @@ void pick_white_card(char * response){
   printf("Message Sent: %s\n",parameter);
 }
 void pick_winner(){
-  
+  //The judge here picks their favorite white card
   int myInt;
   int result = scanf("%d", &myInt);
   write(id,&myInt,sizeof(myInt));
   printf("Message Sent: %d\n",myInt);
 }
 void replace_card(char * response){
-  //printf("%s\n",response);
+  //Replacing the "used" card with a new, random one
   strcpy(white_cards[chosen -1],strsep(&response, "\n"));
 }
 

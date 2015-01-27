@@ -1,7 +1,8 @@
 #include "deck.h"
 
-//reads in "white", "black", or both decks if not specified
+
 void read_in_files(char * type){
+  //reads in "white", "black", or both decks if not specified
   if (!strcmp("white",type))
     read_white();
   if (!strcmp("black",type))
@@ -13,6 +14,7 @@ void read_in_files(char * type){
 
 }
 void read_white(){
+  //helper for read_in_files() which reads the whitecards in from their file
   char line[1000];
   FILE *ptr_file;
   ptr_file =fopen("whitecards.txt","r");
@@ -37,6 +39,7 @@ void read_white(){
 }
 
 void read_black(){
+  //helper for read_in_files() which reads the blacks in from their file
   char line[1000];
   FILE *ptr_file;
   ptr_file =fopen("blackcards.txt","r");
@@ -59,6 +62,7 @@ void read_black(){
 }
 
 char * draw(char * type){
+  //"Draws" (returns) a card from a specified deck. If necessary, recreates the deck
   if (!strcmp("black",type)){
     if (!numb_black){
 
@@ -66,6 +70,7 @@ char * draw(char * type){
       int x;
       for( x = 0; x< numb_black_total;x++){
 	black_cards[x]=black_cards_buffer[x];
+	shuffle("black");
       }
       numb_black = numb_black_total;
       ///
@@ -82,6 +87,7 @@ char * draw(char * type){
       int x;
       for( x = 0; x< numb_white_total;x++){
 	white_cards[x]=white_cards_buffer[x];
+	shuffle("white");
       }
       numb_white = numb_white_total;
       //end
@@ -94,6 +100,7 @@ char * draw(char * type){
 
 
 void shuffle ( char* type ){
+  //shuffles the array of pointers to different parts of the buffer. 
   if (!strcmp("black",type)){
     srand ( time(NULL) );
     int n = numb_black;
@@ -123,20 +130,3 @@ void shuffle ( char* type ){
   }
 }
 
-
-/*
-int main(int argc, char *argv[]){
-
-  read_in_files("both");
-  int x = 0;
-
-  while (x< 10){
-    printf("%d.\n",x);
-    printf("White: %s",draw("white"));
-    printf("Black: %s",draw("black"));
-    x++;
-  }
-
-
-  return 0;
-  }*/

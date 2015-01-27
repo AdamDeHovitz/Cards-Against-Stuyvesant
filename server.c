@@ -1,34 +1,17 @@
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <sys/types.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include <signal.h>
-#include <sys/shm.h>
-#include <sys/ipc.h>
-#include <sys/sem.h>
-#include <fcntl.h>
 #include "deck.h"
-
-
-int number_users;
-int judge;
-int total_clients;
+int number_users; //Max number of users
+int judge; //judge value
 typedef struct n  {
-  int descriptor;
-  char name[1000];
-  //char whitecard[1000];
-  int score = 0;
+  int descriptor; //Used for socket connection
+  char name[1000];//Their name
+  int score;      //The all important score
 
 } client_info;
-client_info * clients[10];
+client_info * clients[10]; //client array (currently limited to 10)
 
 
 static void sighandler( int signo ) {
-  //Takes the signal number
+  //Take keyboard interrupt and ruins terminate
   //Kills itself after sending a last message to the server
     if ( signo == SIGINT ) {
       terminate();
@@ -36,6 +19,8 @@ static void sighandler( int signo ) {
 }
 
 void terminate(){
+  //Caused by keyboard interrupt to clients or server
+  //Sends last message and KILLS ALL CLIENTS
   char death[1000] = "[exit]A client has disconnected\nFinal scores:\n";
   int x;
   for(x = 0;x<number_users;x++){
@@ -61,11 +46,13 @@ void send_to_players(char message[1000]){
 
 
 void manage_round(){
-  //Should pick a judge
-  judge = (judge + 1) % total_clients;
-  printf("%s is the judge.\n",clients[judge]-> name);
+  //Runs the main round
+
+  //Let's pick a judge
+  judge = (judge + 1) % number_users;
   int x;
   
+  //Everyone should know who the judge now is
   char message1[1000] = "You are the judge ";
   write(clients[judge]->descriptor,message1,sizeof(message1));
   
@@ -78,14 +65,13 @@ void manage_round(){
   read_in_files("black");
   char to_client[1000] = "Current Black Card: ";
   strcat(to_client, draw("black"));
-  printf("%s\n",to_client);
 
   //Sent black card to each player
   for(x = 0;x<number_users;x++){
     write(clients[x]->descriptor,to_client,sizeof(to_client));
   }
 
-  //get responses and store them in the client_info for each client in array clients
+  //Get the card choices from each player
   char to_client2[1000] = "[rn][pc]Pick the number of your chosen card: ";
   send_to_players(to_client2);
   char responses[1000] = "Responses are:";
@@ -99,20 +85,23 @@ void manage_round(){
       char response[1000];
       sprintf(response,"\n%d. from %s: ", n, clients[x]->name);
       strcat(response,card);
-      printf("%s\n",response);
       strcat(responses,response);
       n++;
     }
   }
   
+  //Each player should know out of what the judge is picking
   send_to_players(responses);
   
+  //The judge now picks
   char to_judge[1000] = "[rn][pw]Pick the winner\n";
   strcat(to_judge,responses);
   write(clients[judge]->descriptor,to_judge,sizeof(to_judge));
   int winner;
   read(clients[judge]->descriptor,&winner,sizeof(winner));
   char result[1000];
+  
+  //Handling the weird number business caused by the judge
   if (n <= judge){
     sprintf(result,"%s won\n",clients[winner-1]->name);
     clients[winner-1]->score++;}
@@ -121,7 +110,7 @@ void manage_round(){
     clients[winner]->score++;
   }
   
-  printf("Peparing to send this result: %s\n",result);
+  //Send the players the result, followed by a new card to replace what they spent
   send_to_players(result);
   for(x = 0;x<number_users;x++){
     if (x != judge){
@@ -132,19 +121,18 @@ void manage_round(){
     }
   }
   
-
-
 }
 
 
 int main() {
   signal( SIGINT, sighandler );
   // Variables
-  total_clients = 0;
+  int total_clients = 0;
   judge = 0;
   int id,client,semd;
   char buff[256];
-  number_users = 3;//Eventually should ask the server to input
+  printf("How many users? ");
+  int result = scanf("%d", &number_users);
   // Socket Creation
   id = socket(AF_INET,SOCK_STREAM,0);
   // Port/Connect
@@ -170,7 +158,6 @@ int main() {
       read(client,from_client,sizeof(from_client));
       if (strncmp(from_client, "[exit] ", 6) == 0)
 	terminate();
-      printf("Just Received This: %s from %d\n",from_client,client);
       strcpy(current->name, from_client);
       clients[total_clients] = current;
       total_clients++;}
@@ -180,6 +167,7 @@ int main() {
   printf("Exited loop\n");
   //Testing to see if all users are accounted for
   int x;
+  printf("Clients in game:\n");
   for(x = 0;x<number_users;x++){
     printf("client %d: name = %s Id = %d\n",x,clients[x]->name, clients[x]->descriptor);
   }
@@ -192,19 +180,18 @@ int main() {
     for(counter = 0; counter < 7;counter++){
       strcat(to_client,draw("white"));
     }
-    //printf("%s\n",to_client);
     write(clients[x]->descriptor,to_client,sizeof(to_client));
 
   }
 
   //Running the game
-  while (1){//temporarily permanent, should at some point
+  while (1){//Goes until someone keyboard interrupts
     manage_round();
   }
 
 
 
-  \
+  
   return 0;
 
 
