@@ -86,17 +86,31 @@ void manage_round(){
   write(clients[judge]->descriptor,to_judge,sizeof(to_judge));
   int winner;
   read(clients[judge]->descriptor,&winner,sizeof(winner));
+  char result[1000];
   if (n < judge){
-    printf("%s won\n",clients[winner-1]->name);
+    sprintf(result,"%s won\n",clients[winner-1]->name);
     clients[winner-1]->score++;}
   else{
-    printf("%s won\n",clients[winner]->name);
+    sprintf(result,"%s won\n",clients[winner]->name);
     clients[winner]->score++;
   }
+  
+  printf("Peparing to send this result: %s\n",result);
+  for(x = 0;x<number_users;x++){
+    if (x != judge){
+      write(clients[x]->descriptor,result,sizeof(result));
+    }
+  }
+  for(x = 0;x<number_users;x++){
+    if (x != judge){
+      char new_card[1000] ="[nc]";
+      strcat(new_card,draw("white"));
+      printf("Sending this new card: %s\n",new_card);
+      write(clients[x]->descriptor,new_card,sizeof(new_card));
+    }
+  }
+  
 
-
-  //Judge picks winner who gets score
-  //Could pretty easily implement some kind of system for choosing each judge
 
 }
 
@@ -163,7 +177,7 @@ int main() {
   read_in_files("both");
   for(x = 0;x<number_users;x++){
     int counter;
-    char to_client[1000] = "Your Deck:\n";
+    char to_client[1000] = "[yd]\n";
     for(counter = 0; counter < 7;counter++){
       strcat(to_client,draw("white"));
     }

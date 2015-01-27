@@ -33,7 +33,7 @@ void read_white(){
     white_cards[x]=white_cards_buffer[x];
   }
 
-  //shuffle("white");
+  shuffle("white");
 }
 
 void read_black(){
