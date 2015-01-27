@@ -17,7 +17,7 @@ void read_white(){
   FILE *ptr_file;
   ptr_file =fopen("whitecards.txt","r");
   numb_white_total = 0;
-  
+
   if (ptr_file)
     while (fgets(line,1000, ptr_file)!=NULL){
       strcpy(white_cards_buffer[numb_white_total], line);
@@ -26,7 +26,7 @@ void read_white(){
     }
 
   fclose(ptr_file);
-  
+
   int x;
   numb_white = numb_white_total;
   for( x = 0; x< numb_white_total;x++){
@@ -35,13 +35,13 @@ void read_white(){
 
   //shuffle("white");
 }
-  
+
 void read_black(){
   char line[1000];
   FILE *ptr_file;
   ptr_file =fopen("blackcards.txt","r");
   numb_black_total = 0;
-  
+
   if (ptr_file)
     while (fgets(line,1000, ptr_file)!=NULL){
       strcpy(black_cards_buffer[numb_black_total], line);
@@ -77,7 +77,7 @@ char * draw(char * type){
   }
   else{
     if (!numb_white){
-      
+
       ///Reset Deck
       int x;
       for( x = 0; x< numb_white_total;x++){
@@ -92,7 +92,7 @@ char * draw(char * type){
 }
 
 
- 
+
 void shuffle ( char* type ){
   if (!strcmp("black",type)){
     srand ( time(NULL) );
@@ -119,7 +119,7 @@ void shuffle ( char* type ){
 	white_cards[x] = white_cards[r];
 	white_cards[r] = storage;
       }
-      
+
   }
 }
 
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]){
 
   read_in_files("both");
   int x = 0;
-  
+
   while (x< 10){
     printf("%d.\n",x);
     printf("White: %s",draw("white"));
