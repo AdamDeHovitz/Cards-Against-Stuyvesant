@@ -21,10 +21,33 @@ typedef struct n  {
   int descriptor;
   char name[1000];
   //char whitecard[1000];
-  int score;
+  int score = 0;
 
 } client_info;
 client_info * clients[10];
+
+
+static void sighandler( int signo ) {
+  //Takes the signal number
+  //Kills itself after sending a last message to the server
+    if ( signo == SIGINT ) {
+      terminate();
+    }
+}
+
+void terminate(){
+  char death[1000] = "[exit]A client has disconnected\nFinal scores:\n";
+  int x;
+  for(x = 0;x<number_users;x++){
+    char score[1000];
+    sprintf(score,"%d. %s: %d points\n",x+1,clients[x]->name,clients[x]->score);
+    strcat(death,score);
+  }
+  for(x = 0;x<number_users;x++){
+    write(clients[x]->descriptor,death,sizeof(death));
+  }
+  exit(0);
+}
 
 
 void send_to_players(char message[1000]){
@@ -71,6 +94,8 @@ void manage_round(){
     if (x != judge){
       char card[1000];
       read(clients[x]->descriptor,card,sizeof(card));
+      if (strncmp(card, "[exit] ", 6) == 0)
+	terminate();
       char response[1000];
       sprintf(response,"\n%d. from %s: ", n, clients[x]->name);
       strcat(response,card);
@@ -88,7 +113,7 @@ void manage_round(){
   int winner;
   read(clients[judge]->descriptor,&winner,sizeof(winner));
   char result[1000];
-  if (n < judge){
+  if (n <= judge){
     sprintf(result,"%s won\n",clients[winner-1]->name);
     clients[winner-1]->score++;}
   else{
@@ -113,6 +138,7 @@ void manage_round(){
 
 
 int main() {
+  signal( SIGINT, sighandler );
   // Variables
   total_clients = 0;
   judge = 0;
@@ -135,20 +161,6 @@ int main() {
   while (total_clients < number_users) {
 
     if( (client = accept(id, NULL, NULL) ) != -1) {
-      /*int boolean = 1;
-	int x;
-
-	//Attempt to fix strange client looping with first client
-	if (total_clients){
-	for(x = 0;x<total_clients;x++){
-	printf("id: %d\n",client);
-	if (clients[x]->descriptor == client){
-	boolean = 0;
-	}
-	}
-	}
-	printf("b: %d\n",boolean);
-	if (boolean){*/
 
       char to_client[1000] = "[rn]Welcome! Please give your name";
       write(client,to_client,sizeof(to_client));
@@ -156,6 +168,8 @@ int main() {
       current->descriptor = client;
       char from_client[1000] = "";
       read(client,from_client,sizeof(from_client));
+      if (strncmp(from_client, "[exit] ", 6) == 0)
+	terminate();
       printf("Just Received This: %s from %d\n",from_client,client);
       strcpy(current->name, from_client);
       clients[total_clients] = current;

@@ -11,6 +11,20 @@ int numb_cards;
 int id;
 int chosen;
 
+
+static void sighandler( int signo ) {
+  //Takes the signal number
+  //Kills itself after sending a last message to the server
+    if ( signo == SIGINT ) {
+      if (id!= -1){
+	char parameter[1000] = "[exit]";
+	write(id,parameter,sizeof(parameter));}
+      exit(0);
+        
+    }
+}
+
+
 void print_cards(){
   int x;
   printf("Your hand:\n");
@@ -55,6 +69,8 @@ void replace_card(char * response){
 }
 
 int main(int arg, char ** arr) {
+  id = -1;
+  signal( SIGINT, sighandler );
   char buff[256];
   // Creates The Socket
   id = socket(AF_INET,SOCK_STREAM,0);
@@ -81,6 +97,10 @@ int main(int arg, char ** arr) {
     if (0 != read(id,response_buffer,sizeof(response_buffer))){
       //read(id,response,sizeof(response));
       char * response = response_buffer;
+      if (strncmp(response, "[exit] ", 6) == 0){
+	response = response + 6;
+	printf("** %s \n",response);
+	exit(0);}
       if (strncmp(response, "[yd] ", 4) == 0){//Checking if recieving Your Deck (complete deck)
 	//printf("Your Deck: \n");
 	get_cards(response);
@@ -107,15 +127,7 @@ int main(int arg, char ** arr) {
 	  fgets(parameter,sizeof(parameter),stdin);
 	  parameter[strlen(parameter)-1] = '\0';
 	  write(id,parameter,sizeof(parameter));
-	  // Determines if you put in 'exit', in which case you can disconnect
-	  if (parameter[0] == 'e' && parameter[1] == 'x' && parameter[2] == 'i' && parameter[3] == 't') {
-	    char stringy[10];
-	    sprintf(stringy,"%d",id);
-	    write(id,stringy,strlen(stringy));
-	    printf("Exiting\n");
-	    return 0;
-	  }
-	  // Otherwise, if not exit, this prints out what you just sent
+
 	  printf("Message Sent: %s\n",parameter);
 	}
       }

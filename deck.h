@@ -21,10 +21,12 @@ int numb_black_total;
 int numb_white;
 int numb_black;
 
+
 void read_in_files(char * type);
 void read_white();
 void read_black();
 char * draw(char * type);
 //void randomize ( char arr[], int n );
 void shuffle(char * type);
+void terminate();
 
