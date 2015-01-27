@@ -16,6 +16,7 @@ void get_cards(char * deck){
   while (deck){
     card = strsep(&deck, "\n");
     white_cards[numb_cards] = card;
+    numb_cards ++;
   }
   white_cards[numb_cards] = 0;
   numb_cards--;
